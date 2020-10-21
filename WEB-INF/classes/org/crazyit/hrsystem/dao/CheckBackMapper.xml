@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.crazyit.hrsystem.dao.CheckBackMapper">
+
+<!-- insert順序還未照DB Table排列 -->	
+	<insert id="save">
+		insert checkback_inf values(null,
+		#{result}, #{reason}, #{app.id}, #{manager.id});
+	</insert>
+	<!-- 使用多表连接查询 -->
+	<select id="findByMgrId" resultMap="checkBackMap">
+		select check.*, app.*, mgr.*
+		from checkback_inf check
+		join application_inf app
+		on check.app_id = app.app_id
+		join employee_inf mgr
+		on check.mgr_id = mgr.emp_id
+		where check.mgr_id = #{id}
+	</select>
+	<resultMap id="checkBackMap" type="checkBack">
+		<!-- 指定check_id、check_result、check_reason映射
+			到CheckBack实体的属性 -->
+		<id column="check_id" property="id"/>
+		<result column="check_result" property="result"/>
+		<result column="check_reason" property="reason"/>
+		<!-- 映射关联实体 -->
+		<association property="app" javaType="application"
+			resultMap="org.crazyit.hrsystem.dao.ApplicationMapper.applicationMap"/>
+		<association property="manager" javaType="manager"
+			resultMap="org.crazyit.hrsystem.dao.ManagerMapper.managerMap"/>
+	</resultMap>
+	<!-- 开启默认的二级缓存 -->
+	<cache/>
+</mapper>
